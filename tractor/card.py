@@ -66,6 +66,61 @@ class Card:
 
         self.suit = suit
         self.rank = rank
+    
+    @staticmethod
+    def get_comparator(trump_suit: Suit, trump_rank: Rank, trick_suit: Suit):
+        def comparator(card1: Card, card2: Card):
+            # Check for the same card
+            if card1.suit == card2.suit:
+                if card1.rank == card2.rank:
+                    return 0
+                
+                # Otherwise, if both trumps, compare values
+                if card1.suit == trump_suit:
+                    if card1.rank == trump_rank:
+                        return 1
+                    if card2.rank == trump_rank:
+                        return -1
+
+                if card1.rank.value == card2.rank.value:
+                    return 0
+                elif card1.rank.value > card2.rank.value:
+                    return 1
+                else:
+                    return -1
+            
+            # Cards aren't the same suit
+            # Check for jokers
+            if card1.suit == Suit.RED_JOKER:
+                return 1
+            if card2.suit == Suit.RED_JOKER:
+                return -1
+            if card1.suit == Suit.BLACK_JOKER:
+                return 1
+            if card2.suit == Suit.BLACK_JOKER:
+                return -1
+            
+            # Check for trumps
+            if card1.suit == trump_suit:
+                return 1
+            if card2.suit == trump_suit:
+                return -1
+            
+            # Check for trick suit
+            if card1.suit == trick_suit:
+                return 1
+            if card2.suit == trick_suit:
+                return -1
+
+            # Normal card comparison
+            if card1.rank.value == card2.rank.value:
+                return 0
+            elif card1.rank.value > card2.rank.value:
+                return 1
+            else:
+                return -1
+        
+        return comparator
 
     def __repr__(self):
         return f'{repr(self.rank)}{repr(self.suit)}'
