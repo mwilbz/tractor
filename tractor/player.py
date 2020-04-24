@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 
 from tractor.card import Card, Deck, Hand, Rank, Suit
 
@@ -16,8 +17,8 @@ class Player:
     def draw(self, deck: Deck):
         self.hand.append_card(deck.draw())
 
-    def sort_hand(self):
-        self.hand.sort()
+    def sort_hand(self, trump_suit: Optional[Suit], trump_rank: Optional[Rank]):
+        self.hand.sort(trump_suit, trump_rank)
 
     def __repr__(self):
         return f'<Player(team={self.team.value}, hand={self.hand})>'

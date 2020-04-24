@@ -1,4 +1,5 @@
-from typing import List
+import time
+from typing import Dict, List
 
 from tractor.card import Card, Deck, Rank, Suit
 from tractor.player import Player, Team
@@ -20,30 +21,55 @@ NON_JOKER_RANKS = [
     Rank.THREE,
     Rank.TWO
 ]
+DEAL_PAUSE_BETWEEN_CARDS_SECONDS = .3
 
 
 class Game:
     def __init__(self):
-        self.deck: Deck = initialize_deck()
+        self.deck: Deck = None
         self.players: List[Player] = [
             Player(team=Team.ONE),
             Player(team=Team.TWO),
             Player(team=Team.ONE),
             Player(team=Team.TWO)
         ]
+        self.scores: Dict[Team, Rank] = {
+            Team.ONE: Rank.TWO,
+            Team.TWO: Rank.TWO
+        }
+        self.declarers: Team = Team.ONE
+        self.trump_suit = None
+    
+    def pause_for_trump_declaration(self):
+        time.sleep(DEAL_PAUSE_BETWEEN_CARDS_SECONDS)
 
     def deal_cards(self):
+        print('Dealing hands!')
         for _ in range(25):
             for player_index in range(4):
                 self.players[player_index].draw(self.deck)
-        
-        for player in self.players:
-            player.sort_hand()
+                self.players[player_index].sort_hand(trump_suit=None, trump_rank=self.scores[self.declarers])
+                self.pause_for_trump_declaration()
+                print(self.players[player_index])
     
-    def start(self):
+    def play_round(self):
+        self.deck = initialize_deck()
+        self.trump_suit = None
         self.deal_cards()
         print(f'Deck: {self.deck}')
         print(f'Players: {self.players}')
+        input('Pausing for input')
+    
+    def start(self):
+        while True:
+            if self.scores[Team.ONE] == Rank.JOKER:
+                print('Team One wins!')
+                return
+            if self.scores[Team.TWO] == Rank.JOKER:
+                print('Team Two wins!')
+                return
+
+            self.play_round()
 
 
 def initialize_deck() -> Deck:

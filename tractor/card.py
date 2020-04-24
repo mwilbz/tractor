@@ -1,7 +1,7 @@
 from enum import Enum
 from functools import cmp_to_key
 import random
-from typing import List
+from typing import List, Optional
 
 
 class Suit(Enum):
@@ -108,15 +108,11 @@ class Card:
                 return -1
             
             if card1.rank == trump_rank and card2.rank == trump_rank:
-                print(f'Hit1 {card1} {card2}')
                 if card1.suit == trump_suit:
-                    print(f'Hit2 {card1} {card2}')
                     return 1
                 if card2.suit == trump_suit:
-                    print(f'Hit3 {card1} {card2}')
                     return -1
                 
-                print(f'Hit4 {card1} {card2}')
                 return 0
             if card1.rank == trump_rank:
                 return 1
@@ -155,7 +151,7 @@ class Card:
         return comparator
     
     @staticmethod
-    def get_sort_comparator(trump_suit: Suit, trump_rank: Rank, trick_suit: Suit):
+    def get_sort_comparator(trump_suit: Optional[Suit], trump_rank: Optional[Rank]):
         def comparator(card1: Card, card2: Card):
             if card1 == card2:
                 return 0
@@ -170,48 +166,37 @@ class Card:
             if card2.suit == Suit.BLACK_JOKER:
                 return -1
             
-            if card1.rank == trump_rank and card2.rank == trump_rank:
-                print(f'Hit1 {card1} {card2}')
-                if card1.suit == trump_suit:
-                    print(f'Hit2 {card1} {card2}')
-                    return 1
-                if card2.suit == trump_suit:
-                    print(f'Hit3 {card1} {card2}')
-                    return -1
-                
-                print(f'Hit4 {card1} {card2}')
-                return 0
-            if card1.rank == trump_rank:
-                return 1
-            if card2.rank == trump_rank:
-                return -1
-            
-            if card1.suit == trump_suit and card2.suit == trump_suit:
+            if trump_rank is not None:
+                if card1.rank == trump_rank and card2.rank == trump_rank:
+                    if trump_suit is None:
+                        return 0
+                    if card1.suit == trump_suit:
+                        return 1
+                    if card2.suit == trump_suit:
+                        return -1
+                    
+                    return 0
                 if card1.rank == trump_rank:
                     return 1
                 if card2.rank == trump_rank:
                     return -1
+            
+            if trump_suit is not None:
+                if card1.suit == trump_suit and card2.suit == trump_suit:
+                    if card1.rank == trump_rank:
+                        return 1
+                    if card2.rank == trump_rank:
+                        return -1
+                    
+                    if card1.rank.value > card2.rank.value:
+                        return 1
+                    else:
+                        return -1
                 
-                if card1.rank.value > card2.rank.value:
+                if card1.suit == trump_suit:
                     return 1
-                else:
+                if card2.suit == trump_suit:
                     return -1
-            
-            if card1.suit == trump_suit:
-                return 1
-            if card2.suit == trump_suit:
-                return -1
-            
-            if card1.suit == trick_suit and card2.suit == trick_suit:
-                if card1.rank.value > card2.rank.value:
-                    return 1
-                else:
-                    return -1
-            
-            if card1.suit == trick_suit:
-                return 1
-            if card2.suit == trick_suit:
-                return -1
 
             suit_comparison = Suit.sort_compare(card1.suit, card2.suit)
             if suit_comparison != 0:
@@ -237,8 +222,8 @@ class CardGroup:
             raise Exception('{self.__class__.__name__} is empty!')
         self.cards.pop(card_index)
     
-    def sort(self):
-        self.cards = sorted(self.cards, key=cmp_to_key(Card.get_trick_comparator(trump_suit=Suit.SPADES, trump_rank=Rank.ACE, trick_suit=Suit.SPADES)))
+    def sort(self, trump_suit: Optional[Suit], trump_rank: Optional[Rank]):
+        self.cards = sorted(self.cards, key=cmp_to_key(Card.get_sort_comparator(trump_suit=trump_suit, trump_rank=trump_rank)))
 
     def __repr__(self):
         return f'<{len(self.cards)} card(s): {repr(self.cards)}>'
