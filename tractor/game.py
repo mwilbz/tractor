@@ -1,5 +1,7 @@
-from card import Deck, Rank, Suit
-from player import Player, Team
+from typing import List
+
+from tractor.card import Card, Deck, Rank, Suit
+from tractor.player import Player, Team
 
 
 NUM_DECKS = 2
@@ -23,12 +25,22 @@ NON_JOKER_RANKS = [
 class Game:
     def __init__(self):
         self.deck: Deck = initialize_deck()
-        self.players = [
+        self.players: List[Player] = [
             Player(team=Team.ONE),
             Player(team=Team.TWO),
             Player(team=Team.ONE),
             Player(team=Team.TWO)
         ]
+
+    def deal_cards(self):
+        for _ in range(25):
+            for player_index in range(4):
+                self.players[player_index].draw(self.deck)
+    
+    def start(self):
+        self.deal_cards()
+        print(f'Deck: {self.deck}')
+        print(f'Players: {self.players}')
 
 
 def initialize_deck() -> Deck:
@@ -48,6 +60,6 @@ def initialize_deck() -> Deck:
                     rank=rank
                 ))
     
+    deck.shuffle()
+    
     return deck
-
-

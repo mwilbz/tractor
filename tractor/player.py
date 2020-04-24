@@ -1,6 +1,6 @@
 from enum import Enum
 
-from tractor.card import Hand
+from tractor.card import Deck, Hand
 
 
 class Team(Enum):
@@ -12,6 +12,12 @@ class Player:
     def __init__(self, team: Team):
         self.hand = Hand()
         self.team = team
+    
+    def draw(self, deck: Deck):
+        self.hand.append_card(deck.draw())
+
+    def sort_hand(self):
+        self.hand.sort()
 
     def __repr__(self):
-        return f'<Player(team={self.team}, hand={self.hand})>'
+        return f'<Player(team={self.team.value}, hand={self.hand})>'
