@@ -1,29 +1,41 @@
 from enum import Enum
+from functools import cmp_to_key
 import random
 from typing import List
 
 
 class Suit(Enum):
-    HEARTS = 'HEARTS'
-    DIAMONDS = 'DIAMONDS'
-    SPADES = 'SPADES'
-    CLUBS = 'CLUBS'
-    RED_JOKER = 'RED_JOKER'
-    BLACK_JOKER = 'BLACK_JOKER'
+    HEARTS = 3
+    DIAMONDS = 2
+    SPADES = 4
+    CLUBS = 1
+    BLACK_JOKER = 5
+    RED_JOKER = 6
+
+    @staticmethod
+    def sort_compare(suit1, suit2):
+        if suit1.value > suit2.value:
+            return 1
+        if suit1.value < suit2.value:
+            return -1
+
+        return 0
 
     def __repr__(self):
-        if self.value == 'HEARTS':
+        if self == Suit.HEARTS:
             return '❤️'
-        if self.value == 'DIAMONDS':
+        if self == Suit.DIAMONDS:
             return '♦️'
-        if self.value == 'SPADES':
+        if self == Suit.SPADES:
             return '♠️'
-        if self.value == 'CLUBS':
+        if self == Suit.CLUBS:
             return '♣️'
-        if self.value == 'RED_JOKER':
+        if self == Suit.RED_JOKER:
             return '🟥'
-        if self.value == 'BLACK_JOKER':
+        if self == Suit.BLACK_JOKER:
             return '⬛️'
+        
+        raise Exception('Got unexpected value for Suit enum')
 
 
 class Rank(Enum):
@@ -41,6 +53,15 @@ class Rank(Enum):
     FOUR = 4
     THREE = 3
     TWO = 2
+
+    @staticmethod
+    def sort_compare(rank1, rank2):
+        if rank1.value > rank2.value:
+            return 1
+        if rank1.value < rank2.value:
+            return -1
+
+        return 0
 
     def __repr__(self):
         if self.value == 15:
@@ -66,59 +87,137 @@ class Card:
 
         self.suit = suit
         self.rank = rank
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.suit == other.suit and self.rank == other.rank
     
     @staticmethod
-    def get_comparator(trump_suit: Suit, trump_rank: Rank, trick_suit: Suit):
+    def get_trick_comparator(trump_suit: Suit, trump_rank: Rank, trick_suit: Suit):
         def comparator(card1: Card, card2: Card):
-            # Check for the same card
-            if card1.suit == card2.suit:
-                if card1.rank == card2.rank:
-                    return 0
-                
-                # Otherwise, if both trumps, compare values
-                if card1.suit == trump_suit:
-                    if card1.rank == trump_rank:
-                        return 1
-                    if card2.rank == trump_rank:
-                        return -1
+            if card1 == card2:
+                return 0
 
-                if card1.rank.value == card2.rank.value:
-                    return 0
-                elif card1.rank.value > card2.rank.value:
-                    return 1
-                else:
-                    return -1
-            
-            # Cards aren't the same suit
-            # Check for jokers
             if card1.suit == Suit.RED_JOKER:
                 return 1
             if card2.suit == Suit.RED_JOKER:
                 return -1
+            
             if card1.suit == Suit.BLACK_JOKER:
                 return 1
             if card2.suit == Suit.BLACK_JOKER:
                 return -1
             
-            # Check for trumps
+            if card1.rank == trump_rank and card2.rank == trump_rank:
+                print(f'Hit1 {card1} {card2}')
+                if card1.suit == trump_suit:
+                    print(f'Hit2 {card1} {card2}')
+                    return 1
+                if card2.suit == trump_suit:
+                    print(f'Hit3 {card1} {card2}')
+                    return -1
+                
+                print(f'Hit4 {card1} {card2}')
+                return 0
+            if card1.rank == trump_rank:
+                return 1
+            if card2.rank == trump_rank:
+                return -1
+
+            if card1.suit == trump_suit and card2.suit == trump_suit:
+                if card1.rank == trump_rank:
+                    return 1
+                if card2.rank == trump_rank:
+                    return -1
+                
+                if card1.rank.value > card2.rank.value:
+                    return 1
+                else:
+                    return -1
+            
             if card1.suit == trump_suit:
                 return 1
             if card2.suit == trump_suit:
                 return -1
             
-            # Check for trick suit
+            if card1.suit == trick_suit and card2.suit == trick_suit:
+                if card1.rank.value > card2.rank.value:
+                    return 1
+                else:
+                    return -1
+            
             if card1.suit == trick_suit:
                 return 1
             if card2.suit == trick_suit:
                 return -1
 
-            # Normal card comparison
-            if card1.rank.value == card2.rank.value:
+            return 0
+        
+        return comparator
+    
+    @staticmethod
+    def get_sort_comparator(trump_suit: Suit, trump_rank: Rank, trick_suit: Suit):
+        def comparator(card1: Card, card2: Card):
+            if card1 == card2:
                 return 0
-            elif card1.rank.value > card2.rank.value:
+
+            if card1.suit == Suit.RED_JOKER:
                 return 1
-            else:
+            if card2.suit == Suit.RED_JOKER:
                 return -1
+            
+            if card1.suit == Suit.BLACK_JOKER:
+                return 1
+            if card2.suit == Suit.BLACK_JOKER:
+                return -1
+            
+            if card1.rank == trump_rank and card2.rank == trump_rank:
+                print(f'Hit1 {card1} {card2}')
+                if card1.suit == trump_suit:
+                    print(f'Hit2 {card1} {card2}')
+                    return 1
+                if card2.suit == trump_suit:
+                    print(f'Hit3 {card1} {card2}')
+                    return -1
+                
+                print(f'Hit4 {card1} {card2}')
+                return 0
+            if card1.rank == trump_rank:
+                return 1
+            if card2.rank == trump_rank:
+                return -1
+            
+            if card1.suit == trump_suit and card2.suit == trump_suit:
+                if card1.rank == trump_rank:
+                    return 1
+                if card2.rank == trump_rank:
+                    return -1
+                
+                if card1.rank.value > card2.rank.value:
+                    return 1
+                else:
+                    return -1
+            
+            if card1.suit == trump_suit:
+                return 1
+            if card2.suit == trump_suit:
+                return -1
+            
+            if card1.suit == trick_suit and card2.suit == trick_suit:
+                if card1.rank.value > card2.rank.value:
+                    return 1
+                else:
+                    return -1
+            
+            if card1.suit == trick_suit:
+                return 1
+            if card2.suit == trick_suit:
+                return -1
+
+            suit_comparison = Suit.sort_compare(card1.suit, card2.suit)
+            if suit_comparison != 0:
+                return suit_comparison
+            
+            return Rank.sort_compare(card1.rank, card2.rank)
         
         return comparator
 
@@ -139,7 +238,7 @@ class CardGroup:
         self.cards.pop(card_index)
     
     def sort(self):
-        self.cards = sorted(self.cards)
+        self.cards = sorted(self.cards, key=cmp_to_key(Card.get_trick_comparator(trump_suit=Suit.SPADES, trump_rank=Rank.ACE, trick_suit=Suit.SPADES)))
 
     def __repr__(self):
         return f'<{len(self.cards)} card(s): {repr(self.cards)}>'

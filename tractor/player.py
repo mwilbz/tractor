@@ -1,6 +1,6 @@
 from enum import Enum
 
-from tractor.card import Deck, Hand
+from tractor.card import Card, Deck, Hand, Rank, Suit
 
 
 class Team(Enum):

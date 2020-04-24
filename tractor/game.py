@@ -36,6 +36,9 @@ class Game:
         for _ in range(25):
             for player_index in range(4):
                 self.players[player_index].draw(self.deck)
+        
+        for player in self.players:
+            player.sort_hand()
     
     def start(self):
         self.deal_cards()

@@ -2,6 +2,14 @@
 
 Tractor is a Chinese card cade, also known as [Sheng Ji](https://en.wikipedia.org/wiki/Sheng_ji).
 
+## Running
+
+Currently there isn't an end-to-end game, but there is a test script you can run with
+
+```
+python run.py
+```
+
 ## Contributing
 
 ### Environment Setup
