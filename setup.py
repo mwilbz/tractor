@@ -19,6 +19,10 @@ setuptools.setup(
     ],
     python_requires='>=3.8',
     install_requires=[
-        'pytest'
+        'eventlet',
+        'flask',
+        'flask-socketio',
+        'pytest',
+        'shortuuid>=1.0.1'
     ]
 )
